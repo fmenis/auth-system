@@ -6,8 +6,8 @@ import cors from 'fastify-cors'
 
 import apiPlugin from './routes/index.js'
 
-// import pgPlugin from './plugins/postgres.js'
-// import redisPlugin from './plugins/redis.js'
+import pgPlugin from './plugins/postgres.js'
+import redisPlugin from './plugins/redis.js'
 // import authPlugin from './plugins/authentication.js'
 
 export default async function app(fastify, opts) {
@@ -23,5 +23,7 @@ export default async function app(fastify, opts) {
   fastify.register(cors)
 
 
+  fastify.register(pgPlugin)
+  fastify.register(redisPlugin)
   fastify.register(apiPlugin)
 }
