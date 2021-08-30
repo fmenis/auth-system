@@ -3,7 +3,7 @@ import S from 'fluent-json-schema'
 import { compareStrings } from '../lib/hash.lib.js'
 
 export default async function login(fastify, opts) {
-  const { httpErrors, jwt } = fastify;
+  const { httpErrors } = fastify;
 
   fastify.route({
     method: 'POST',
@@ -26,7 +26,7 @@ export default async function login(fastify, opts) {
 
     const user = await db.findOne('SELECT * FROM users WHERE email=$1', [email])
     if (!user) {
-      log.debug(`[login] invalid credentials. User with email ${email} not found`)
+      log.debug(`[login] invalid access. User with email ${email} not found`)
       return httpErrors.unauthorized('Invalid email or password')
     }
 
@@ -42,18 +42,16 @@ export default async function login(fastify, opts) {
 
     const match = await compareStrings(password, user.password)
     if (!match) {
-      log.debug(`[login] invalid password. Password for user ${email} does not match`)
-      return httpErrors.unauthorized('This user is blocked by ad administrator')
+      log.debug(`[login] invalid access. Password for user ${email} does not match`)
+      return httpErrors.unauthorized('Invalid email or password')
     }
-
-    const token = jwt.sign({ id: user.id }, { expiresIn: '120 days' });
 
     await redis.set(user.id, {
       userId: user.id,
       createdAt: new Date()
     })
 
-    reply.setCookie(user.id, token, {
+    reply.setCookie('token', user.id, { //##TODO!!!
       path: '/',
       httpOnly: true,
       signed: true,
@@ -63,6 +61,8 @@ export default async function login(fastify, opts) {
       // maxAge: '',
     })
 
-    return { token }
+    reply.code(204)
   }
 }
+
+
