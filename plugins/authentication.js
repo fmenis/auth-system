@@ -1,50 +1,55 @@
 import Fp from 'fastify-plugin'
+import cookie from 'fastify-cookie'
+
 
 async function authentication(fastify, opts) {
+  fastify.register(cookie, {
+    secret: process.env.SECRET
+  })
 
-  async function hook(req, reply) {
-    const { db, redis, httpErrors } = this
+  async function authenticate(req, reply) {
+    const { db, redis, httpErrors, log } = this
 
-    if (req.url === '/login') { //##TODO!!!
-      return
+    const cookie = req.cookies.session
+    if (!cookie) {
+      log.debug(`[authentication] Error: cookie not found`)
+      throw httpErrors.unauthorized('Authentication error')
     }
 
-    const token = req.cookies.token
-
-    const cookie = req.unsignCookie(token);
-    if (!cookie.valid) {
+    const unsignedCookie = req.unsignCookie(cookie);
+    if (!unsignedCookie.valid) {
       log.debug(`[authentication] Error: invalid cookie`)
-      return httpErrors.unauthorized('Authentication error')
+      throw httpErrors.unauthorized('Authentication error')
     }
 
-    const userId = cookie.value
+    const userId = unsignedCookie.value
     const session = await redis.get(userId)
     if (!session) {
       log.debug(`[authentication] Error: session not found for user '${userId}'`,)
-      return httpErrors.unauthorized('Session not found')
+      throw httpErrors.unauthorized('Session not found')
     }
 
     const user = await db.findOne('SELECT * FROM users WHERE id=$1', [userId])
     if (!user) {
       log.debug(`[authentication] Error: user with id '${userId}' not found`,)
-      return httpErrors.unauthorized(`User '${userId}' not found`)
+      throw httpErrors.unauthorized(`User '${userId}' not found`)
     }
 
     if (user.isDeleted) {
       log.warn(`[authentication] user '${user.id}' is deleted`)
-      return httpErrors.forbidden('This user is deleted')
+      throw httpErrors.forbidden('This user is deleted')
     }
 
     if (user.isBlocked) {
       log.warn(`[authentication] user '${user.id}' is blocked`)
-      return httpErrors.forbidden('This user is blocked by an administrator')
+      throw httpErrors.forbidden('This user is blocked by an administrator')
     }
 
     req.user = user
   }
 
   fastify.decorateRequest('user', null)
-  fastify.addHook('onRequest', hook)
+  fastify.decorate('authenticate', authenticate)
 }
 
 export default Fp(authentication)

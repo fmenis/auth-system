@@ -27,23 +27,23 @@ export default async function login(fastify, opts) {
     const user = await db.findOne('SELECT * FROM users WHERE email=$1', [email])
     if (!user) {
       log.debug(`[login] invalid access. User with email ${email} not found`)
-      return httpErrors.unauthorized('Invalid email or password')
+      throw httpErrors.unauthorized('Invalid email or password')
     }
 
     if (user.isDeleted) {
       log.warn(`[login] invalid access. Login attempt from deleted user ${email} (id: ${user.id})`)
-      return httpErrors.forbidden('This user is deleted')
+      throw httpErrors.forbidden(`User '${userId}' is deleted`)
     }
 
     if (user.isBlocked) {
       log.warn(`[login] invalid access. Login attempt from blocked user ${email} (id: ${user.id})`)
-      return httpErrors.forbidden('This user is blocked by an administrator')
+      throw httpErrors.forbidden(`User '${userId}' is blocked by an administrator`)
     }
 
     const match = await compareStrings(password, user.password)
     if (!match) {
       log.debug(`[login] invalid access. Password for user ${email} does not match`)
-      return httpErrors.unauthorized('Invalid email or password')
+      throw httpErrors.unauthorized('Invalid email or password')
     }
 
     await redis.set(user.id, {
@@ -51,7 +51,7 @@ export default async function login(fastify, opts) {
       createdAt: new Date()
     })
 
-    reply.setCookie('token', user.id, { //##TODO!!!
+    const cookieOptions = {
       path: '/',
       httpOnly: true,
       signed: true,
@@ -59,7 +59,13 @@ export default async function login(fastify, opts) {
       // SameSite: 'Lax',
       // domain: 'example.com',
       // maxAge: '',
-    })
+    }
+
+    if (process.env.NODE_ENV !== 'development') {
+      cookieOptions.secure = true
+    }
+
+    reply.setCookie('session', user.id, cookieOptions)
 
     reply.code(204)
   }

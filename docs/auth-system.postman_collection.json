@@ -6,31 +6,6 @@
 	},
 	"item": [
 		{
-			"name": "Health check",
-			"request": {
-				"method": "GET",
-				"header": [
-					{
-						"key": "accept-version",
-						"value": "2.x",
-						"type": "text"
-					}
-				],
-				"url": {
-					"raw": "http://localhost:3000/health",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "3000",
-					"path": [
-						"health"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "login",
 			"request": {
 				"method": "POST",
@@ -75,15 +50,6 @@
 						"type": "text"
 					}
 				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"email\": \"andrea@acme.com\",\n    \"password\": \"password\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
 				"url": {
 					"raw": "http://localhost:3000/logout",
 					"protocol": "http",
@@ -93,6 +59,31 @@
 					"port": "3000",
 					"path": [
 						"logout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Health check",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "accept-version",
+						"value": "2.x",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/health",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"health"
 					]
 				}
 			},
