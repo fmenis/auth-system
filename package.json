@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "NODE_ENV=production node -r dotenv/config index.js",
-    "dev": "NODE_ENV=development nodemon --config nodemon.json --inspect -r dotenv/config index.js"
+    "dev": "NODE_ENV=development nodemon --config nodemon.json --inspect -r dotenv/config index.js",
+    "test": "node -r dotenv/config test/test.js"
   },
   "author": "filippomeniswork@gmail.com",
   "license": "ISC",
@@ -21,7 +22,8 @@
     "fastify-sensible": "^3.1.1",
     "fluent-json-schema": "^3.0.1",
     "pg": "^8.7.1",
-    "redis": "^3.1.2"
+    "redis": "^3.1.2",
+    "tap": "^15.0.9"
   },
   "devDependencies": {
     "nodemon": "^2.0.12",

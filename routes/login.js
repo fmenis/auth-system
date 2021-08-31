@@ -61,7 +61,7 @@ export default async function login(fastify, opts) {
       // maxAge: '',
     }
 
-    if (process.env.NODE_ENV !== 'development') {
+    if (process.env.NODE_ENV === 'production') {
       cookieOptions.secure = true
     }
 
