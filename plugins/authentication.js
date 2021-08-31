@@ -10,6 +10,11 @@ async function authentication(fastify, opts) {
   async function authenticate(req, reply) {
     const { db, redis, httpErrors, log } = this
 
+    // public routes
+    if (reply.context?.config?.public) {
+      return
+    }
+  
     const cookie = req.cookies.session
     if (!cookie) {
       log.debug(`[authentication] Error: cookie not found`)
@@ -49,7 +54,7 @@ async function authentication(fastify, opts) {
   }
 
   fastify.decorateRequest('user', null)
-  fastify.decorate('authenticate', authenticate)
+  fastify.addHook('onRequest', authenticate)
 }
 
 export default Fp(authentication)

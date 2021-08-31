@@ -8,6 +8,11 @@ export default async function login(fastify, opts) {
   fastify.route({
     method: 'POST',
     path: '/login',
+    context: {
+      config: {
+        public: true
+      }
+    },
     schema: {
       body: S.object()
         .additionalProperties(false)

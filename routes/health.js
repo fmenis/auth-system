@@ -1,8 +1,6 @@
 import S from 'fluent-json-schema'
 
 export default async function health(fastify, opts) {
-	fastify.addHook('onRequest', fastify.authenticate)
-
 	fastify.route({
 		method: 'GET',
 		path: '/health',
