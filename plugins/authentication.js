@@ -5,7 +5,7 @@ import { clearCookie } from '../lib/common.js'
 
 async function authentication(fastify, opts) {
   fastify.register(cookie, {
-    secret: process.env.SECRET
+    secret: fastify.config.SECRET
   })
 
   async function authenticate(req, reply) {
@@ -53,7 +53,7 @@ async function authentication(fastify, opts) {
     }
 
     // reset session ttl
-    await redis.setExpireTime(userId, 60)
+    await redis.setExpireTime(userId, fastify.config.SESSION_TTL)
     req.user = user
   }
 

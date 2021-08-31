@@ -3,8 +3,8 @@ import Fp from 'fastify-plugin'
 
 async function redisClient(fastify, opts) {
 	const client = redis.createClient({
-		host: process.env.REDIS_HOST,
-		port: process.env.REDIS_PORT
+		host: fastify.config.REDIS_HOST,
+		port: fastify.config.REDIS_PORT
 	});
 
 	client.on('error', function (error) {

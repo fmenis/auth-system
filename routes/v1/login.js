@@ -47,7 +47,7 @@ export default async function login(fastify, opts) {
       email: user.email,
       createdAt: new Date(),
       isValid: true
-    }, { ttl: 60 }) // two weeks
+    }, { ttl: fastify.config.SESSION_TTL })
 
     const cookieOptions = {
       path: '/api',
@@ -59,7 +59,7 @@ export default async function login(fastify, opts) {
       expire: moment().add(6, 'months').toDate().toUTCString()
     }
 
-    if (process.env.NODE_ENV === 'production') {
+    if (fastify.config.NODE_ENV === 'production') {
       cookieOptions.secure = true
     }
 

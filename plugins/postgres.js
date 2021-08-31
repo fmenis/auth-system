@@ -3,11 +3,11 @@ import Fp from 'fastify-plugin'
 
 async function postgresClient(fastify, opts) {
 	const pool = new pg.Pool({
-		user: process.env.PG_USER,
-		host: process.env.PG_HOST,
-		database: process.env.PG_DB,
-		password: process.env.PG_PW,
-		port: process.env.PG_PORT
+		user: fastify.config.PG_USER,
+		host: fastify.config.PG_HOST,
+		database: fastify.config.PG_DB,
+		password: fastify.config.PG_PW,
+		port: fastify.config.PG_PORT
 	})
 
 	pool.query('SELECT NOW()', (err, res) => {
