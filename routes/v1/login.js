@@ -1,6 +1,7 @@
 import S from 'fluent-json-schema'
+import moment from 'moment'
 
-import { compareStrings } from '../lib/hash.lib.js'
+import { compareStrings } from '../../lib/hash.js'
 
 export default async function login(fastify, opts) {
   const { httpErrors } = fastify;
@@ -8,19 +9,14 @@ export default async function login(fastify, opts) {
   fastify.route({
     method: 'POST',
     path: '/login',
-    context: {
-      config: {
-        public: true
-      }
+    config: {
+      public: true
     },
     schema: {
       body: S.object()
         .additionalProperties(false)
         .prop('email', S.string().required())
-        .prop('password', S.string().minLength(8).required()),
-      reponse: {
-        200: S.object().prop('token', S.string()),
-      }
+        .prop('password', S.string().minLength(8).required())
     },
     handler: onLogin
   })
@@ -33,11 +29,6 @@ export default async function login(fastify, opts) {
     if (!user) {
       log.debug(`[login] invalid access. User with email ${email} not found`)
       throw httpErrors.unauthorized('Invalid email or password')
-    }
-
-    if (user.isDeleted) {
-      log.warn(`[login] invalid access. Login attempt from deleted user ${email} (id: ${user.id})`)
-      throw httpErrors.forbidden(`User '${userId}' is deleted`)
     }
 
     if (user.isBlocked) {
@@ -53,17 +44,19 @@ export default async function login(fastify, opts) {
 
     await redis.set(user.id, {
       userId: user.id,
-      createdAt: new Date()
-    })
+      email: user.email,
+      createdAt: new Date(),
+      isValid: true
+    }, { ttl: 60 }) // two weeks
 
     const cookieOptions = {
-      path: '/',
+      path: '/api',
       httpOnly: true,
       signed: true,
-      // secure: true,
-      // SameSite: 'Lax',
-      // domain: 'example.com',
-      // maxAge: '',
+      SameSite: 'Lax',
+      domain: 'localhost',
+      // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Date
+      expire: moment().add(6, 'months').toDate().toUTCString()
     }
 
     if (process.env.NODE_ENV === 'production') {
@@ -75,5 +68,3 @@ export default async function login(fastify, opts) {
     reply.code(204)
   }
 }
-
-

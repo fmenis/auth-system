@@ -14,5 +14,5 @@ export default async function app(fastify, opts) {
 
   fastify.register(pgPlugin)
   fastify.register(redisPlugin)
-  fastify.register(apiPlugin)
+  fastify.register(apiPlugin, { prefix: '/api'})
 }

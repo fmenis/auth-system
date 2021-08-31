@@ -1,3 +1,5 @@
+import { clearCookie } from '../../lib/common.js'
+
 export default async function logout(fastify, opts) {
   fastify.route({
     method: 'POST',
@@ -8,7 +10,7 @@ export default async function logout(fastify, opts) {
   async function onLogout(req, reply) {
     const { redis } = this
     await redis.del(req.user.id)
-    reply.clearCookie('session', { path: '/' })
+    clearCookie(reply)
     reply.code(204)
   }
 }

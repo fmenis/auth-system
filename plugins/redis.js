@@ -75,8 +75,19 @@ async function redisClient(fastify, opts) {
 		});
 	};
 
+	function setExpireTime(key, ttl) {
+		return new Promise((resolve, reject) => {
+			client.expire(key, ttl, (err, reply) => {
+				if (err) {
+					return reject(err);
+				}
+				resolve(reply);
+			});
+		});
+	};
+
 	fastify.decorate('redis', {
-		close, get, set, del
+		close, get, set, del, setExpireTime
 	})
 }
 
